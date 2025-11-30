@@ -1,13 +1,7 @@
 import { motion } from "motion/react";
-import { Heart, Facebook, Instagram, Twitter, Mail } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export function Footer() {
-  const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Mail, href: "#", label: "Email" }
-  ];
 
   return (
     <footer className="py-20 px-6 bg-[var(--color-primary)]">
@@ -64,25 +58,6 @@ export function Footer() {
             </p>
           </motion.div>
 
-          {/* Social Links */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            {socialLinks.map((social, index) => (
-              <motion.a
-                key={index}
-                href={social.href}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-                whileHover={{ scale: 1.2, y: -5 }}
-                className="w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-[var(--color-accent)]"
-                aria-label={social.label}
-              >
-                <social.icon className="text-white" size={20} />
-              </motion.a>
-            ))}
-          </div>
-
           {/* Organization Info */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -95,7 +70,7 @@ export function Footer() {
             <p className="text-white/70 mb-2">Intercambio Nacional 2025</p>
             <p className="text-white/50 text-sm">
               © {new Date().getFullYear()} Todos los derechos reservados. Hecho con{" "}
-              <Heart className="inline-block" size={14} /> por todos nosotros.
+              <Heart className="inline-block" size={14} /> por Manu.
             </p>
           </motion.div>
         </motion.div>

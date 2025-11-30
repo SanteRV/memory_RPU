@@ -19,20 +19,66 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 px-6 bg-[var(--color-primary)]">
       {/* Geometric Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Organic wave pattern */}
-        <div className="absolute inset-0 opacity-5">
+        {/* Organic wave pattern - Animated */}
+        <motion.div
+          className="absolute inset-0 opacity-5"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        >
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="waves" width="200" height="200" patternUnits="userSpaceOnUse">
-                <path d="M0 100 Q 50 80, 100 100 T 200 100" fill="none" stroke="var(--color-accent)" strokeWidth="1.5"/>
-                <path d="M0 120 Q 50 100, 100 120 T 200 120" fill="none" stroke="var(--color-accent)" strokeWidth="1"/>
+                <motion.path
+                  d="M0 100 Q 50 80, 100 100 T 200 100"
+                  fill="none"
+                  stroke="var(--color-accent)"
+                  strokeWidth="1.5"
+                  animate={{
+                    d: [
+                      "M0 100 Q 50 80, 100 100 T 200 100",
+                      "M0 100 Q 50 120, 100 100 T 200 100",
+                      "M0 100 Q 50 80, 100 100 T 200 100"
+                    ]
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <motion.path
+                  d="M0 120 Q 50 100, 100 120 T 200 120"
+                  fill="none"
+                  stroke="var(--color-accent)"
+                  strokeWidth="1"
+                  animate={{
+                    d: [
+                      "M0 120 Q 50 100, 100 120 T 200 120",
+                      "M0 120 Q 50 140, 100 120 T 200 120",
+                      "M0 120 Q 50 100, 100 120 T 200 120"
+                    ]
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5
+                  }}
+                />
                 <circle cx="50" cy="50" r="3" fill="var(--color-accent)" opacity="0.3"/>
                 <circle cx="150" cy="150" r="2" fill="var(--color-accent)" opacity="0.2"/>
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#waves)" />
           </svg>
-        </div>
+        </motion.div>
 
         {/* Circular ripple effects */}
         {[...Array(5)].map((_, i) => (
@@ -504,17 +550,44 @@ export function Hero() {
         {/* div2 - Top Left Photo */}
         <motion.div
           initial={{ opacity: 0, scale: 0, rotate: -20 }}
-          animate={{ opacity: 1, scale: 1, rotate: -8 }}
-          transition={{ duration: 0.8, delay: 2 }}
-          whileHover={{ scale: 1.15, rotate: -4, zIndex: 50 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            rotate: -8,
+            y: [0, -8, 0]
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 2,
+            y: {
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+          whileHover={{
+            scale: 1.3,
+            rotate: 0,
+            zIndex: 50,
+            transition: { duration: 0.3 }
+          }}
+          whileTap={{ scale: 0.9 }}
           style={{
             gridRow: 'span 3 / span 3',
             gridColumnStart: 1,
-            gridRowStart: 1
+            gridRowStart: 1,
+            cursor: 'pointer'
           }}
           className="flex items-center justify-center"
         >
-          <div className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3" style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}>
+          <motion.div
+            className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3"
+            style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}
+            whileHover={{
+              boxShadow: "0 0 40px rgba(247, 197, 72, 1), 0 0 80px rgba(247, 197, 72, 0.5)",
+              borderColor: "rgb(247, 197, 72)"
+            }}
+          >
             <img
               src={recuerdo1}
               alt="Recuerdo 1"
@@ -527,23 +600,50 @@ export function Hero() {
                 display: 'block'
               }}
             />
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* div3 - Bottom Left Photo */}
         <motion.div
           initial={{ opacity: 0, scale: 0, rotate: 20 }}
-          animate={{ opacity: 1, scale: 1, rotate: 6 }}
-          transition={{ duration: 0.8, delay: 2.4 }}
-          whileHover={{ scale: 1.15, rotate: 3, zIndex: 50 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            rotate: 6,
+            y: [0, -10, 0]
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 2.4,
+            y: {
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+          whileHover={{
+            scale: 1.3,
+            rotate: 0,
+            zIndex: 50,
+            transition: { duration: 0.3 }
+          }}
+          whileTap={{ scale: 0.9 }}
           style={{
             gridRow: 'span 2 / span 2',
             gridColumnStart: 1,
-            gridRowStart: 4
+            gridRowStart: 4,
+            cursor: 'pointer'
           }}
           className="flex items-center justify-center"
         >
-          <div className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3" style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}>
+          <motion.div
+            className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3"
+            style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}
+            whileHover={{
+              boxShadow: "0 0 40px rgba(247, 197, 72, 1), 0 0 80px rgba(247, 197, 72, 0.5)",
+              borderColor: "rgb(247, 197, 72)"
+            }}
+          >
             <img
               src={recuerdo3}
               alt="Recuerdo 3"
@@ -556,23 +656,50 @@ export function Hero() {
                 display: 'block'
               }}
             />
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* div4 - Top Right Photo */}
         <motion.div
           initial={{ opacity: 0, scale: 0, rotate: 20 }}
-          animate={{ opacity: 1, scale: 1, rotate: 8 }}
-          transition={{ duration: 0.8, delay: 2.2 }}
-          whileHover={{ scale: 1.15, rotate: 4, zIndex: 50 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            rotate: 8,
+            y: [0, -7, 0]
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 2.2,
+            y: {
+              duration: 2.8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+          whileHover={{
+            scale: 1.3,
+            rotate: 0,
+            zIndex: 50,
+            transition: { duration: 0.3 }
+          }}
+          whileTap={{ scale: 0.9 }}
           style={{
             gridRow: 'span 2 / span 2',
             gridColumnStart: 5,
-            gridRowStart: 1
+            gridRowStart: 1,
+            cursor: 'pointer'
           }}
           className="flex items-center justify-center"
         >
-          <div className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3" style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}>
+          <motion.div
+            className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3"
+            style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}
+            whileHover={{
+              boxShadow: "0 0 40px rgba(247, 197, 72, 1), 0 0 80px rgba(247, 197, 72, 0.5)",
+              borderColor: "rgb(247, 197, 72)"
+            }}
+          >
             <img
               src={recuerdo2}
               alt="Recuerdo 2"
@@ -585,23 +712,50 @@ export function Hero() {
                 display: 'block'
               }}
             />
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* div5 - Bottom Right Photo */}
         <motion.div
           initial={{ opacity: 0, scale: 0, rotate: -20 }}
-          animate={{ opacity: 1, scale: 1, rotate: -6 }}
-          transition={{ duration: 0.8, delay: 2.6 }}
-          whileHover={{ scale: 1.15, rotate: -3, zIndex: 50 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            rotate: -6,
+            y: [0, -9, 0]
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 2.6,
+            y: {
+              duration: 3.2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+          whileHover={{
+            scale: 1.3,
+            rotate: 0,
+            zIndex: 50,
+            transition: { duration: 0.3 }
+          }}
+          whileTap={{ scale: 0.9 }}
           style={{
             gridRow: 'span 3 / span 3',
             gridColumnStart: 5,
-            gridRowStart: 3
+            gridRowStart: 3,
+            cursor: 'pointer'
           }}
           className="flex items-center justify-center"
         >
-          <div className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3" style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}>
+          <motion.div
+            className="relative rounded-lg border-8 border-white shadow-2xl bg-white p-3"
+            style={{ width: 'fit-content', height: 'fit-content', maxWidth: '100%', maxHeight: '100%' }}
+            whileHover={{
+              boxShadow: "0 0 40px rgba(247, 197, 72, 1), 0 0 80px rgba(247, 197, 72, 0.5)",
+              borderColor: "rgb(247, 197, 72)"
+            }}
+          >
             <img
               src={recuerdo4}
               alt="Recuerdo 4"
@@ -614,7 +768,7 @@ export function Hero() {
                 display: 'block'
               }}
             />
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 
