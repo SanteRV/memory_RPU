@@ -1,23 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Upload, X, Camera } from "lucide-react";
+import { Upload, X, Camera, MapPin, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 interface UploadedPhoto {
-  id: string;
-  url: string;
-  name: string;
-  caption: string;
+  id: number;
+  nombre: string;
+  departamento: string;
+  experiencia: string;
+  foto_url: string;
+  created_at: string;
 }
+
+const API_URL = 'http://localhost:3003/api';
+
+const DEPARTAMENTOS_PERU = [
+  'Amazonas',
+  'Áncash',
+  'Apurímac',
+  'Arequipa',
+  'Ayacucho',
+  'Cajamarca',
+  'Callao',
+  'Cusco',
+  'Huancavelica',
+  'Huánuco',
+  'Ica',
+  'Junín',
+  'La Libertad',
+  'Lambayeque',
+  'Lima',
+  'Loreto',
+  'Madre de Dios',
+  'Moquegua',
+  'Pasco',
+  'Piura',
+  'Puno',
+  'San Martín',
+  'Tacna',
+  'Tumbes',
+  'Ucayali'
+];
 
 export function UploadPhoto() {
   const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
   const [name, setName] = useState("");
   const [caption, setCaption] = useState("");
+  const [location, setLocation] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
+
+  // Cargar experiencias al montar el componente
+  useEffect(() => {
+    fetchExperiencias();
+  }, []);
+
+  // Función para mostrar notificaciones
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Obtener todas las experiencias
+  const fetchExperiencias = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/experiencias`);
+      const data = await response.json();
+
+      if (data.success) {
+        setUploadedPhotos(data.data);
+      }
+    } catch (error) {
+      console.error('Error al cargar experiencias:', error);
+      showNotification('error', 'Error al cargar las experiencias');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -26,31 +93,107 @@ export function UploadPhoto() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (previewUrl && name) {
-      const newPhoto: UploadedPhoto = {
-        id: Date.now().toString(),
-        url: previewUrl,
-        name,
-        caption
-      };
-      setUploadedPhotos([newPhoto, ...uploadedPhotos]);
-      setPreviewUrl(null);
-      setName("");
-      setCaption("");
-      const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
-      if (fileInput) fileInput.value = "";
+
+    if (!selectedFile || !name || !location || !caption) {
+      showNotification('error', 'Por favor completa todos los campos');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('foto', selectedFile);
+      formData.append('nombre', name);
+      formData.append('departamento', location);
+      formData.append('experiencia', caption);
+
+      const response = await fetch(`${API_URL}/experiencias`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', '¡Experiencia compartida exitosamente!');
+
+        // Limpiar formulario
+        setPreviewUrl(null);
+        setSelectedFile(null);
+        setName("");
+        setCaption("");
+        setLocation("");
+        const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+
+        // Recargar experiencias
+        fetchExperiencias();
+      } else {
+        showNotification('error', data.message || 'Error al compartir experiencia');
+      }
+    } catch (error) {
+      console.error('Error al enviar experiencia:', error);
+      showNotification('error', 'Error al conectar con el servidor');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const removePhoto = (id: string) => {
-    setUploadedPhotos(uploadedPhotos.filter(photo => photo.id !== id));
+  const removePhoto = async (id: number) => {
+    if (!confirm('¿Estás seguro de eliminar esta experiencia?')) return;
+
+    try {
+      const response = await fetch(`${API_URL}/experiencias/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', 'Experiencia eliminada');
+        fetchExperiencias();
+      } else {
+        showNotification('error', 'Error al eliminar');
+      }
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      showNotification('error', 'Error al conectar con el servidor');
+    }
   };
 
   return (
     <section className="py-20 px-6 bg-[var(--color-primary)]">
       <div className="max-w-6xl mx-auto">
+        {/* Notificaciones */}
+        <AnimatePresence>
+          {notification && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-6 right-6 z-50 max-w-md"
+            >
+              <div
+                className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl ${
+                  notification.type === 'success'
+                    ? 'bg-green-500'
+                    : 'bg-red-500'
+                }`}
+              >
+                {notification.type === 'success' ? (
+                  <CheckCircle className="text-white" size={24} />
+                ) : (
+                  <AlertCircle className="text-white" size={24} />
+                )}
+                <p className="text-white font-medium">{notification.message}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -103,7 +246,7 @@ export function UploadPhoto() {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="name" className="block mb-2 text-[var(--color-primary)]">
+              <label htmlFor="name" className="block mb-2 text-[var(--color-primary)] font-semibold">
                 Tu nombre *
               </label>
               <input
@@ -113,37 +256,75 @@ export function UploadPhoto() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
-                placeholder="Ingresa tu nombre"
+                placeholder="Ej: María González"
               />
             </div>
 
+            <div className="mb-4">
+              <label htmlFor="location" className="block mb-2 text-[var(--color-primary)] font-semibold">
+                Tu departamento *
+              </label>
+              <select
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all bg-white cursor-pointer"
+              >
+                <option value="">Selecciona tu departamento</option>
+                {DEPARTAMENTOS_PERU.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="mb-6">
-              <label htmlFor="caption" className="block mb-2 text-[var(--color-primary)]">
-                Frase corta (opcional)
+              <label htmlFor="caption" className="block mb-2 text-[var(--color-primary)] font-semibold">
+                Tu experiencia *
               </label>
               <textarea
                 id="caption"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
+                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all resize-none"
-                placeholder="Comparte un pensamiento o recuerdo..."
-                rows={3}
+                placeholder="Comparte tu experiencia del intercambio..."
+                rows={4}
               />
             </div>
 
             <button
               type="submit"
-              disabled={!previewUrl || !name}
-              className="w-full py-4 rounded-xl text-white transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-[var(--color-accent)]"
+              disabled={!previewUrl || !name || !location || !caption || isSubmitting}
+              className="w-full py-4 rounded-xl font-semibold transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 bg-[var(--color-accent)] border-2 border-[var(--color-accent)]"
+              style={{
+                minHeight: '56px',
+                color: 'var(--color-primary)'
+              }}
             >
-              <Upload size={20} />
-              Subir Foto
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
+                  Subiendo...
+                </>
+              ) : (
+                <>
+                  <Upload size={20} style={{ color: 'var(--color-primary)' }} />
+                  Compartir Experiencia
+                </>
+              )}
             </button>
           </form>
         </motion.div>
 
         {/* Uploaded Photos Wall */}
-        {uploadedPhotos.length > 0 && (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="text-white animate-spin" size={48} />
+          </div>
+        ) : uploadedPhotos.length > 0 ? (
           <div>
             <h3 className="text-white text-center mb-8">Muro de Recuerdos</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -164,17 +345,29 @@ export function UploadPhoto() {
                     >
                       <X size={16} />
                     </button>
-                    <img src={photo.url} alt={photo.name} className="w-full h-64 object-cover" />
+                    <img
+                      src={`http://localhost:3003${photo.foto_url}`}
+                      alt={photo.nombre}
+                      className="w-full h-64 object-cover"
+                    />
                     <div className="p-4">
-                      <p className="text-[var(--color-primary)]">{photo.name}</p>
-                      {photo.caption && (
-                        <p className="text-gray-600 italic mt-2">"{photo.caption}"</p>
+                      <p className="text-[var(--color-primary)] font-bold text-lg">{photo.nombre}</p>
+                      <div className="flex items-center gap-1 mt-1 mb-2">
+                        <MapPin className="text-[var(--color-accent)]" size={14} />
+                        <p className="text-gray-600 text-sm">{photo.departamento}</p>
+                      </div>
+                      {photo.experiencia && (
+                        <p className="text-gray-700 italic mt-2">"{photo.experiencia}"</p>
                       )}
                     </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-white/70 text-lg">Aún no hay experiencias compartidas. ¡Sé el primero!</p>
           </div>
         )}
       </div>
