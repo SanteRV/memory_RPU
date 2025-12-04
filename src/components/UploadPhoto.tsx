@@ -1,15 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Upload, X, Camera, MapPin, Loader2, CheckCircle, AlertCircle } from "lucide-react";
-
-interface UploadedPhoto {
-  id: number;
-  nombre: string;
-  departamento: string;
-  experiencia: string;
-  foto_url: string;
-  created_at: string;
-}
+import { Upload, Camera, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 const API_URL = 'http://localhost:3003/api';
 
@@ -42,43 +33,18 @@ const DEPARTAMENTOS_PERU = [
 ];
 
 export function UploadPhoto() {
-  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
   const [name, setName] = useState("");
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
-
-  // Cargar experiencias al montar el componente
-  useEffect(() => {
-    fetchExperiencias();
-  }, []);
 
   // Función para mostrar notificaciones
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 5000);
-  };
-
-  // Obtener todas las experiencias
-  const fetchExperiencias = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_URL}/experiencias`);
-      const data = await response.json();
-
-      if (data.success) {
-        setUploadedPhotos(data.data);
-      }
-    } catch (error) {
-      console.error('Error al cargar experiencias:', error);
-      showNotification('error', 'Error al cargar las experiencias');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,9 +94,6 @@ export function UploadPhoto() {
         setLocation("");
         const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
         if (fileInput) fileInput.value = "";
-
-        // Recargar experiencias
-        fetchExperiencias();
       } else {
         showNotification('error', data.message || 'Error al compartir experiencia');
       }
@@ -142,27 +105,6 @@ export function UploadPhoto() {
     }
   };
 
-  const removePhoto = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta experiencia?')) return;
-
-    try {
-      const response = await fetch(`${API_URL}/experiencias/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showNotification('success', 'Experiencia eliminada');
-        fetchExperiencias();
-      } else {
-        showNotification('error', 'Error al eliminar');
-      }
-    } catch (error) {
-      console.error('Error al eliminar:', error);
-      showNotification('error', 'Error al conectar con el servidor');
-    }
-  };
 
   return (
     <section className="py-20 px-6 bg-[var(--color-primary)]">
@@ -318,58 +260,6 @@ export function UploadPhoto() {
             </button>
           </form>
         </motion.div>
-
-        {/* Uploaded Photos Wall */}
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="text-white animate-spin" size={48} />
-          </div>
-        ) : uploadedPhotos.length > 0 ? (
-          <div>
-            <h3 className="text-white text-center mb-8">Muro de Recuerdos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {uploadedPhotos.map((photo) => (
-                  <motion.div
-                    key={photo.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    whileHover={{ y: -5 }}
-                    className="bg-white rounded-2xl overflow-hidden shadow-xl relative"
-                  >
-                    <button
-                      onClick={() => removePhoto(photo.id)}
-                      className="absolute top-3 right-3 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors z-10"
-                      aria-label="Eliminar foto"
-                    >
-                      <X size={16} />
-                    </button>
-                    <img
-                      src={`http://localhost:3003${photo.foto_url}`}
-                      alt={photo.nombre}
-                      className="w-full h-64 object-cover"
-                    />
-                    <div className="p-4">
-                      <p className="text-[var(--color-primary)] font-bold text-lg">{photo.nombre}</p>
-                      <div className="flex items-center gap-1 mt-1 mb-2">
-                        <MapPin className="text-[var(--color-accent)]" size={14} />
-                        <p className="text-gray-600 text-sm">{photo.departamento}</p>
-                      </div>
-                      {photo.experiencia && (
-                        <p className="text-gray-700 italic mt-2">"{photo.experiencia}"</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-white/70 text-lg">Aún no hay experiencias compartidas. ¡Sé el primero!</p>
-          </div>
-        )}
       </div>
     </section>
   );
