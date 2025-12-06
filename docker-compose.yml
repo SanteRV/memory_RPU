@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: rpu_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: santerv
+      POSTGRES_DB: intercambio_nacional
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - rpu_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: rpu_backend
+    restart: unless-stopped
+    environment:
+      DB_USER: postgres
+      DB_HOST: postgres
+      DB_NAME: intercambio_nacional
+      DB_PASSWORD: santerv
+      DB_PORT: 5432
+      PORT: 3003
+      NODE_ENV: production
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rpu_network
+    volumes:
+      - ./server/uploads:/app/uploads
+
+  # Frontend React
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rpu_frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://161.132.50.147:3003
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - rpu_network
+
+volumes:
+  postgres_data:
+
+networks:
+  rpu_network:
+    driver: bridge

@@ -1,11 +1,12 @@
 import { motion } from "motion/react";
-import { Heart } from "lucide-react";
+import { Heart, MapIcon } from "lucide-react";
+import { PeruMap3D } from "./PeruMap3DHybrid";
 
 export function Footer() {
 
   return (
     <footer className="py-20 px-6 bg-[var(--color-primary)]">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -48,7 +49,7 @@ export function Footer() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="inline-block bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-6 mb-12"
+            className="inline-block bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-6 mb-16"
           >
             <p className="text-white/90 italic text-xl mb-2">
               "El verdadero viaje no termina cuando regresamos a casa,"
@@ -57,6 +58,26 @@ export function Footer() {
               "termina cuando dejamos de recordar."
             </p>
           </motion.div>
+
+          {/* 3D Interactive Map */}
+          {/* <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mb-16"
+          >
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <MapIcon className="text-[var(--color-accent)]" size={32} />
+              <h3 className="text-white text-2xl font-bold">
+                Mapa Interactivo del Perú
+              </h3>
+            </div>
+            <p className="text-white/80 text-center mb-8 max-w-2xl mx-auto">
+              Explora las regiones del Perú en 3D. Haz clic en cualquier región para ver más detalles.
+            </p>
+            <PeruMap3D />
+          </motion.div> */}
 
           {/* Organization Info */}
           <motion.div
